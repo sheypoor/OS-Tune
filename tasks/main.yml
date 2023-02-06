@@ -1,0 +1,187 @@
+---
+# tasks file for ostune
+- name: Install unattended-upgrades 
+  ansible.builtin.package:
+    name:
+      - unattended-upgrades
+      - apt-listchanges
+    state: present
+    update_cache: true
+  become: true
+  tags:
+    - ostune
+    - unattended-upgrades
+
+- name: copy apt preferences
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dst }}"
+  with_items:
+    - src: 20auto-upgrades
+      dst: /etc/apt/apt.conf.d/
+    - src: 50unattended-upgrades
+      dst: /etc/apt/apt.conf.d/
+    - src: listchanges.conf
+      dst: /etc/apt/
+  become: true
+  tags:
+    - ostune
+    - unattended-upgrades
+
+- name: Install fail2ban
+  ansible.builtin.package:
+    name:
+      - fail2ban
+    state: present
+  become: true
+  tags:
+    - ostune
+    - fail2ban
+
+- name: block tty logins
+  ansible.builtin.copy:
+    src: access.conf
+    dest: /etc/security/
+  become: true
+  tags:
+    - ostune
+    - security
+
+- name: Install mailutils
+  ansible.builtin.package:
+    name:
+      - mailutils
+    state: present
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: set mailutils config
+  ansible.builtin.copy:
+    src: update-exim4.conf.conf
+    dest: /etc/exim4/
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: update exim4 conf
+  ansible.builtin.debconf:
+    name: exim4-config
+    question: "{{ item.q }}"
+    value: "{{ item.v }}"
+    vtype: string
+  with_items:
+    - q: exim4/dc_other_hostnames
+      v: "{{ inventory_hostname }};localhost"
+    - q: exim4/dc_readhost
+      v: "{{ inventory_hostname }}"
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: ensure password is set in exim
+  ansible.builtin.lineinfile:
+    path: /etc/exim4/passwd.client
+    regexp: '^\*\:devops\:'
+    line: "*:devops:{{ smtp_pass }}"
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: let allow unencrypted passwords
+  ansible.builtin.lineinfile:
+    path: /etc/exim4/exim4.conf.localmacros
+    regex: '^AUTH_CLIENT_ALLOW_NOTLS_PASSWORDS'
+    line: "AUTH_CLIENT_ALLOW_NOTLS_PASSWORDS = 1"
+    mode: 0644
+    create: yes
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: reconfigure exim4
+  command: dpkg-reconfigure -fnoninteractive exim4-config
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: restart exim4
+  ansible.builtin.service:
+    name: exim4
+    state: restarted
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: disable IPv6 with sysctl
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: "1"
+    state: present
+    reload: true
+  with_items:
+    - net.ipv6.conf.all.disable_ipv6
+    - net.ipv6.conf.default.disable_ipv6
+    - net.ipv6.conf.lo.disable_ipv6
+  become: true
+  tags:
+    - ostune
+    - ipv6
+
+- name: blacklist ipv6 in modprobe
+  ansible.builtin.lineinfile:
+    dest: /etc/modprobe.d/blacklist.conf
+    line: 'blacklist ipv6'
+    mode: 0644
+    create: yes
+  become: true
+  tags:
+    - ostune
+    - ipv6
+
+- name: install firewalld
+  ansible.builtin.package:
+    name: firewalld
+    state: present
+  become: true
+  tags:
+    - ostune
+    - firewalld
+
+- name: permit ssh traffic in firewalld
+  ansible.posix.firewalld:
+    service: ssh
+    permanent: true
+    state: enabled
+  become: true
+  tags:
+    - ostune
+    - firewalld
+
+- name: enable firewalld
+  ansible.builtin.service:
+    name: firewalld
+    enabled: true
+    state: restarted
+  become: true
+  tags:
+    - ostune
+    - firewalld
+
+- name: install apparmor profiles
+  ansible.builtin.package:
+    name:
+      - apparmor-profiles
+      - apparmor-profiles-extra
+    state: present
+  become: true
+  tags:
+    - ostune
+    - apparmor

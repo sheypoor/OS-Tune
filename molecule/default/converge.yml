@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include sheypoor.ostune"
+      include_role:
+        name: "sheypoor.ostune"

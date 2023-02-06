@@ -1,0 +1,3 @@
+---
+# defaults file for ostune
+smtp_pass: "1234567890"

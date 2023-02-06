@@ -1,0 +1,14 @@
+---
+dependency:
+  name: galaxy
+driver:
+  name: libvirt
+platforms:
+  - name: ostune-debian
+    image_url: "http://127.0.0.1:8000/debian-11-genericcloud-amd64.qcow2"
+    qemu_user: "danialbehzadi"
+    libvirt_user: "danialbehzadi"
+provisioner:
+  name: ansible
+verifier:
+  name: ansible
