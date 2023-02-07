@@ -1,2 +1,39 @@
 ---
 # handlers file for ostune
+- name: restart firewalld
+  ansible.builtin.service:
+    name: firewalld
+    state: restarted
+    enabled: true
+  become: true
+  tags:
+    - ostune
+    - firewalld
+
+- name: reconfigure exim4
+  command: dpkg-reconfigure -fnoninteractive exim4-config
+  become: true
+  notify:
+    - restart exim4
+  tags:
+    - ostune
+    - mailutils
+
+- name: restart exim4
+  ansible.builtin.service:
+    name: exim4
+    state: restarted
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: restart rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
+    enabled: true
+  become: true
+  tags:
+    - ostune
+    - rsyslog

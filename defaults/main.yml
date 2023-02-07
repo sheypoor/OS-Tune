@@ -1,3 +1,7 @@
 ---
 # defaults file for ostune
+smtp_user: "devops@sheypoor.com"
 smtp_pass: "1234567890"
+glog_target: "10.10.0.100"
+glog_port: 5044
+glog_proto: "tcp"

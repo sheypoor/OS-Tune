@@ -17,9 +17,9 @@
 # This is a Debian specific file
 
 dc_eximconfig_configtype='smarthost'
-dc_other_hostnames='ostune-debian;localhost'
+dc_other_hostnames='{{ inventory_hostname }};localhost'
 dc_local_interfaces='127.0.0.1 ; ::1'
-dc_readhost='ostune-debian'
+dc_readhost='{{ inventory_hostname }}'
 dc_relay_domains=''
 dc_minimaldns='false'
 dc_relay_nets=''

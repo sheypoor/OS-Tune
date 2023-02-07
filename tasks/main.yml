@@ -16,13 +16,17 @@
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dst }}"
+    mode: "{{ item.mod }}"
   with_items:
     - src: 20auto-upgrades
       dst: /etc/apt/apt.conf.d/
+      mod: '0644'
     - src: 50unattended-upgrades
       dst: /etc/apt/apt.conf.d/
+      mod: '0644'
     - src: listchanges.conf
       dst: /etc/apt/
+      mod: '0755'
   become: true
   tags:
     - ostune
@@ -42,6 +46,7 @@
   ansible.builtin.copy:
     src: access.conf
     dest: /etc/security/
+    mode: '0644'
   become: true
   tags:
     - ostune
@@ -57,36 +62,11 @@
     - ostune
     - mailutils
 
-- name: set mailutils config
-  ansible.builtin.copy:
-    src: update-exim4.conf.conf
-    dest: /etc/exim4/
-  become: true
-  tags:
-    - ostune
-    - mailutils
-
-- name: update exim4 conf
-  ansible.builtin.debconf:
-    name: exim4-config
-    question: "{{ item.q }}"
-    value: "{{ item.v }}"
-    vtype: string
-  with_items:
-    - q: exim4/dc_other_hostnames
-      v: "{{ inventory_hostname }};localhost"
-    - q: exim4/dc_readhost
-      v: "{{ inventory_hostname }}"
-  become: true
-  tags:
-    - ostune
-    - mailutils
-
 - name: ensure password is set in exim
   ansible.builtin.lineinfile:
     path: /etc/exim4/passwd.client
     regexp: '^\*\:devops\:'
-    line: "*:devops:{{ smtp_pass }}"
+    line: "*:{{ smtp_user }}:{{ smtp_pass }}"
   become: true
   tags:
     - ostune
@@ -104,18 +84,40 @@
     - ostune
     - mailutils
 
-- name: reconfigure exim4
-  command: dpkg-reconfigure -fnoninteractive exim4-config
-  become: true
-  tags:
-    - ostune
-    - mailutils
+      #- name: set mailutils config
+      #  ansible.builtin.copy:
+      #    src: update-exim4.conf.conf
+      #    dest: /etc/exim4/
+      #    mode: '0644'
+      #  become: true
+      #  tags:
+      #    - ostune
+      #    - mailutils
+      #
+      #- name: update exim4 conf
+      #  ansible.builtin.debconf:
+      #    name: exim4-config
+      #    question: "{{ item.q }}"
+      #    value: "{{ item.v }}"
+      #    vtype: string
+      #  with_items:
+      #    - q: exim4/dc_other_hostnames
+      #      v: "{{ inventory_hostname }};localhost"
+      #    - q: exim4/dc_readhost
+      #      v: "{{ inventory_hostname }}"
+      #  become: true
+      #  tags:
+      #    - ostune
+      #    - mailutils
 
-- name: restart exim4
-  ansible.builtin.service:
-    name: exim4
-    state: restarted
+- name: set exim4 config
+  ansible.builtin.template:
+    src: update-exim4.conf.conf.j2
+    dest: /etc/exim4/update-exim4.conf.conf
+    mode: '0644'
   become: true
+  notify:
+    - reconfigure exim4
   tags:
     - ostune
     - mailutils
@@ -155,26 +157,6 @@
     - ostune
     - firewalld
 
-- name: permit ssh traffic in firewalld
-  ansible.posix.firewalld:
-    service: ssh
-    permanent: true
-    state: enabled
-  become: true
-  tags:
-    - ostune
-    - firewalld
-
-- name: enable firewalld
-  ansible.builtin.service:
-    name: firewalld
-    enabled: true
-    state: restarted
-  become: true
-  tags:
-    - ostune
-    - firewalld
-
 - name: install apparmor profiles
   ansible.builtin.package:
     name:
@@ -185,3 +167,66 @@
   tags:
     - ostune
     - apparmor
+
+- name: install prometheus exporters
+  ansible.builtin.package:
+    name:
+      - prometheus-node-exporter
+    state: present
+  become: true
+  tags:
+    - ostune
+    - prometheus
+
+- name: permit node exporter in firewalld
+  ansible.posix.firewalld:
+    port: 9100/tcp
+    permanent: true
+    state: enabled
+  become: true
+  tags:
+    - ostune
+    - firewalld
+    - prometheus
+
+- name: Check open-vm-tools to be installed
+  ansible.builtin.package:
+    name:
+      - open-vm-tools
+    state: present
+  become: true
+  tags:
+    - ostune
+    - openvmtools
+
+- name: Install tuned
+  ansible.builtin.package:
+    name:
+      - tuned
+    state: present
+  become: true
+  tags:
+    - ostune
+    - tuned
+
+- name: Install rsyslog
+  ansible.builtin.package:
+    name:
+      - rsyslog
+    state: present
+  become: true
+  tags:
+    - ostune
+    - rsyslog
+
+- name: config rsyslog to send syslog to graylog
+  ansible.builtin.template:
+    src: graylog.conf.j2
+    dest: /etc/rsyslog.d/graylog.conf
+    mode: '0644'
+  become: true
+  notify:
+    - restart rsyslog
+  tags:
+    - ostune
+    - rsyslog
