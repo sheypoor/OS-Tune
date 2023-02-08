@@ -1,5 +1,6 @@
 ---
 # defaults file for ostune
+email_address: "devops@sheypoor.com"
 smtp_user: "devops@sheypoor.com"
 smtp_pass: "1234567890"
 glog_target: "10.10.0.100"

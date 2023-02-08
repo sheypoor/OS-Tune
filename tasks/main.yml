@@ -88,7 +88,18 @@
   ansible.builtin.lineinfile:
     path: /etc/email-addresses
     regex: '^root\: '
-    line: "root: devops@sheypoor.com"
+    line: "root: {{ email_address }}"
+    mode: 0644
+  become: true
+  tags:
+    - ostune
+    - mailutils
+
+- name: set email alias to root
+  ansible.builtin.lineinfile:
+    path: /etc/aliases
+    regex: '^root\: '
+    line: "root: {{ email_address }}"
     mode: 0644
   become: true
   tags:
