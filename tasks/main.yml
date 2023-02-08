@@ -84,31 +84,16 @@
     - ostune
     - mailutils
 
-      #- name: set mailutils config
-      #  ansible.builtin.copy:
-      #    src: update-exim4.conf.conf
-      #    dest: /etc/exim4/
-      #    mode: '0644'
-      #  become: true
-      #  tags:
-      #    - ostune
-      #    - mailutils
-      #
-      #- name: update exim4 conf
-      #  ansible.builtin.debconf:
-      #    name: exim4-config
-      #    question: "{{ item.q }}"
-      #    value: "{{ item.v }}"
-      #    vtype: string
-      #  with_items:
-      #    - q: exim4/dc_other_hostnames
-      #      v: "{{ inventory_hostname }};localhost"
-      #    - q: exim4/dc_readhost
-      #      v: "{{ inventory_hostname }}"
-      #  become: true
-      #  tags:
-      #    - ostune
-      #    - mailutils
+- name: set email address for root
+  ansible.builtin.lineinfile:
+    path: /etc/email-addresses
+    regex: '^root\: '
+    line: "root: devops@sheypoor.com"
+    mode: 0644
+  become: true
+  tags:
+    - ostune
+    - mailutils
 
 - name: set exim4 config
   ansible.builtin.template:
