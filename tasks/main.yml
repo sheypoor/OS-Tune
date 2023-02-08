@@ -65,7 +65,7 @@
 - name: ensure password is set in exim
   ansible.builtin.lineinfile:
     path: /etc/exim4/passwd.client
-    regexp: '^\*\:devops\:'
+    regexp: '^\*\:{{ smtp_user }}\:'
     line: "*:{{ smtp_user }}:{{ smtp_pass }}"
   become: true
   tags:
