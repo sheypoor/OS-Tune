@@ -226,3 +226,26 @@
   tags:
     - ostune
     - rsyslog
+
+- name: install zram-tools
+  ansible.builtin.package:
+    name: zram-tools
+    state: present
+  become: true
+  tags:
+    - ostune
+
+- name: config zram-tools
+  ansible.builtin.shell:
+    cmd: echo -e "ALGO=zstd\nPERCENT=60" | sudo tee -a /etc/default/zramswap
+  become: true
+  tags:
+    - ostune
+
+- name: restart zramswap
+  ansible.builtin.service:
+    name: zramswap
+    state: restarted
+  become: true
+  tags:
+    - ostune
