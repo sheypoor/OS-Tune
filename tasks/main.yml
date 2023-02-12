@@ -56,6 +56,7 @@
   ansible.builtin.package:
     name:
       - mailutils
+      - exim4
     state: present
   become: true
   tags:
@@ -67,7 +68,6 @@
     path: /etc/exim4/passwd.client
     regexp: '^\*\:{{ smtp_user }}\:'
     line: "*:{{ smtp_user }}:{{ smtp_pass }}"
-    create: yes
   become: true
   tags:
     - ostune
@@ -91,7 +91,6 @@
     regex: '^root\: '
     line: "root: {{ email_address }}"
     mode: 0644
-    create: yes
   become: true
   tags:
     - ostune
@@ -246,7 +245,7 @@
     mode: 0644
   become: true
   notify:
-    - reload zram
+    - reload zramswap
   tags:
     - ostune
     - zram
@@ -259,7 +258,7 @@
     mode: 0644
   become: true
   notify:
-    - reload zram
+    - reload zramswap
   tags:
     - ostune
     - zram
@@ -272,7 +271,7 @@
     mode: 0644
   become: true
   notify:
-    - reload zram
+    - reload zramswap
   tags:
     - ostune
     - zram
