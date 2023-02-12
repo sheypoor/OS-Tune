@@ -1,6 +1,6 @@
 ---
-- hosts: {{ host }}
-  remote_user: {{ user }}
+- hosts: "{{ host }}"
+  remote_user: "{{ user }}"
   become: true
   roles:
     - ostune
