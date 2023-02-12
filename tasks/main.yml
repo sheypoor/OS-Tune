@@ -67,6 +67,7 @@
     path: /etc/exim4/passwd.client
     regexp: '^\*\:{{ smtp_user }}\:'
     line: "*:{{ smtp_user }}:{{ smtp_pass }}"
+    create: yes
   become: true
   tags:
     - ostune
