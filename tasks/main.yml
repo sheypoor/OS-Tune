@@ -91,6 +91,7 @@
     regex: '^root\: '
     line: "root: {{ email_address }}"
     mode: 0644
+    create: yes
   become: true
   tags:
     - ostune
