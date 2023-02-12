@@ -1,5 +1,5 @@
 ---
-- hosts: "{{ host }}"
+- hosts: all
   remote_user: "{{ user }}"
   become: true
   roles:
