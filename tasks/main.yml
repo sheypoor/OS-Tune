@@ -234,10 +234,30 @@
   become: true
   tags:
     - ostune
+    - zram
 
-- name: config zram-tools
-  ansible.builtin.shell:
-    cmd: echo -e "ALGO=zstd\nPERCENT=60" | sudo tee -a /etc/default/zramswap
+- name: set zram compression algorithm
+  ansible.builtin.lineinfile:
+    path: /etc/default/zramswap
+    regex: '^ALGO'
+    line: "ALGO=zstd"
+    mode: 0644
   become: true
+  notify:
+    - reload zram
   tags:
     - ostune
+    - zram
+
+- name: set zram percentage of ram
+  ansible.builtin.lineinfile:
+    path: /etc/default/zramswap
+    regex: '^PERCENT'
+    line: "PERCENT=60"
+    mode: 0644
+  become: true
+  notify:
+    - reload zram
+  tags:
+    - ostune
+    - zram
