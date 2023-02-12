@@ -37,3 +37,11 @@
   tags:
     - ostune
     - rsyslog
+
+- name: reload zramswap
+  ansible.builtin.service:
+    name: zramswap
+    state: reloaded
+  become: true
+  tags:
+    - ostune

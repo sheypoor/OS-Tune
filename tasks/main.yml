@@ -241,11 +241,3 @@
   become: true
   tags:
     - ostune
-
-- name: restart zramswap
-  ansible.builtin.service:
-    name: zramswap
-    state: reloaded
-  become: true
-  tags:
-    - ostune
