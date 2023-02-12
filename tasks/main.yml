@@ -245,7 +245,7 @@
 - name: restart zramswap
   ansible.builtin.service:
     name: zramswap
-    state: restarted
+    state: reloaded
   become: true
   tags:
     - ostune
