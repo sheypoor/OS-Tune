@@ -367,6 +367,49 @@
     - ostune
     - hardening
 
+- name: log suspicious packets
+  # Log suspicious packets received by the kernel to detect icoming attacks.
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '1'
+    state: present
+    reload: true
+  with_items:
+    - net.ipv4.conf.all.log_martians
+    - net.ipv4.conf.default.log_martians
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: deny icmp redirect
+  # an attacker could send bogus ICMP redirection messages to try to route the
+  # outgoing network packets to other systems (including his own) and thus
+  # allowing for man in the middle or denial of service attacks.
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '0'
+    state: present
+    reload: true
+  with_items:
+    - net.ipv4.conf.all.accept_redirects
+    - net.ipv4.conf.default.accept_redirects
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: restrict crontab usage
+  ansible.builtin.lineinfile:
+    path: /etc/cron.allow
+    regexp: '^root'
+    line: "root"
+    create: yes
+  become: true
+  tags:
+    - ostune
+    - hardening
+
 - name: reduce permission on device files
   # Devices that have improper (world) permissions might be accessed by any
   # system user. This might open security holes if these are shared devices
@@ -375,11 +418,22 @@
   # device to multiple users, for example).
   ansible.builtin.file:
     path: "{{ item }}"
-    mode: 'o-r'
+    mode: 'o-rwx'
   with_items:
     - /dev/autofs
     - /dev/fuse
     - /dev/kmsg
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: remove unnessecary group writes
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: 'g-w'
+  with_items:
+    - /etc/fstab
   become: true
   tags:
     - ostune
