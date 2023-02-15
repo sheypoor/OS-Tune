@@ -330,3 +330,80 @@
   tags:
     - ostune
     - zram
+
+- name: prevent sending IP spoofed packets
+  # Spoofed packets are commonly used by trojans that make use of
+  # compromised hosts to deliver denial of service, man in the middle
+  # or connection hijacking.
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '2'
+    state: present
+    reload: true
+  with_items:
+    - net.ipv4.conf.all.rp_filter
+    - net.ipv4.conf.default.rp_filter
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: deny source routing
+  # Source routing might permit an attacker to send packets through a
+  # host (if routing is enabled) to other hosts without following network
+  # topology setup. It should be enabled only under very special
+  # circumstances or otherwise an attacker could try to bypass the traffic
+  # filtering that is done on the network.
+  ansible.posix.sysctl:
+    name: "{{ item }}"
+    value: '0'
+    state: present
+    reload: true
+  with_items:
+    - net.ipv4.conf.all.accept_source_route
+    - net.ipv4.conf.default.accept_source_route
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: reduce permission on device files
+  # Devices that have improper (world) permissions might be accessed by any
+  # system user. This might open security holes if these are shared devices
+  # or hold binaries (disks for example). The administrator should properly
+  # set device access (using group configuration to provide access to a
+  # device to multiple users, for example).
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: 'o-r'
+  with_items:
+    - /dev/autofs
+    - /dev/fuse
+    - /dev/kmsg
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: remove unnessecary setuids
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: 'u-s'
+  with_items:
+    - /bin/su
+    - /usr/bin/passwd
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: remove unnessecary setgids
+  ansible.builtin.file:
+    path: "{{ item }}"
+    mode: 'g-s'
+  with_items:
+    - /usr/bin/wall
+  become: true
+  tags:
+    - ostune
+    - hardening
