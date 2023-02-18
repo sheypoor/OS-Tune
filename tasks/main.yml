@@ -461,3 +461,33 @@
   tags:
     - ostune
     - hardening
+
+- name: disable login for root
+  ansible.builtin.lineinfile:
+    path: /etc/passwd
+    regexp: '^root'
+    line: 'root:x:0:0:root:/root:/usr/bin/nologin'
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: add /bin/sync into /etc/shells
+  ansible.builtin.lineinfile:
+    path: /etc/shells
+    regexp: '^\/bin\/sync'
+    line: '/bin/sync'
+  become: true
+  tags:
+    - ostune
+    - hardening
+
+- name: add nonexistent instead / for systemd-coredump user
+  ansible.builtin.lineinfile:
+    path: /etc/passwd
+    regexp: '^systemd-coredump'
+    line: 'systemd-coredump:x:999:999:systemd Core Dumper:/nonexistent:/usr/sbin/nologin'
+  become: true
+  tags:
+    - ostune
+    - hardening
