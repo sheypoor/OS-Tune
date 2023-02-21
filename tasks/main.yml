@@ -465,8 +465,8 @@
 - name: disable login for some users
   ansible.builtin.lineinfile:
     path: /etc/passwd
-    regexp: '^{{ username }}'
-    line: '{{ username }}:x:{{ uid }}:{{ gid }}:{{ groupname }}:{{ home }}:/usr/sbin/nologin'
+    regexp: '^{{ item.username }}'
+    line: '{{ item.username }}:x:{{ item.uid }}:{{ item.gid }}:{{ item.groupname }}:{{ item.home }}:/usr/sbin/nologin'
   with_items:
     - username: "root"
       groupname: "root"
