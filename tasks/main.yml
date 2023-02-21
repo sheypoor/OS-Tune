@@ -462,21 +462,22 @@
     - ostune
     - hardening
 
-- name: disable login for root
+- name: disable login for some users
   ansible.builtin.lineinfile:
     path: /etc/passwd
-    regexp: '^root'
-    line: 'root:x:0:0:root:/root:/usr/bin/nologin'
-  become: true
-  tags:
-    - ostune
-    - hardening
-
-- name: add /bin/sync into /etc/shells
-  ansible.builtin.lineinfile:
-    path: /etc/shells
-    regexp: '^\/bin\/sync'
-    line: '/bin/sync'
+    regexp: '^{{ username }}'
+    line: '{{ username }}:x:{{ uid }}:{{ gid }}:{{ groupname }}:{{ home }}:/usr/sbin/nologin'
+  with_items:
+    - username: "root"
+      groupname: "root"
+      uid: 0
+      gid: 0
+      home: "/root"
+    - username: "sync"
+      groupname: "sync"
+      uid: 4
+      gid: 65534
+      home: "/bin"
   become: true
   tags:
     - ostune
