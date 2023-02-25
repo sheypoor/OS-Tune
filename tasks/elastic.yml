@@ -1,0 +1,24 @@
+---
+# Set disk read-ahead to 128kb
+- name: copy timer unit
+  ansible.builtin.copy:
+    src: readahead.service
+    dest: /lib/systemd/system/readahead.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  tags:
+    - ostune
+    - elastic
+
+- name: enable and run timer unit
+  ansible.builtin.systemd:
+    name: readahead.service
+    daemon_relaod: true
+    state: started
+    enabled: true
+  become: true
+  tags:
+    - ostune
+    - elastic
