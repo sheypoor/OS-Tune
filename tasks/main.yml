@@ -287,118 +287,6 @@
     - ostune
     - zram
 
-- name: set cache_pressure value for zram
-  ansible.posix.sysctl:
-    name: vm.vfs_cache_pressure
-    value: '50'
-    state: present
-    reload: true
-  become: true
-  tags:
-    - ostune
-    - zram
-
-- name: set swappiness value for zram
-  ansible.posix.sysctl:
-    name: vm.swappiness
-    value: '10'
-    state: present
-    reload: true
-  become: true
-  tags:
-    - ostune
-    - zram
-
-- name: set dirty_background_ratio value for zram
-  ansible.posix.sysctl:
-    name: vm.dirty_background_ratio
-    value: '1'
-    state: present
-    reload: true
-  become: true
-  tags:
-    - ostune
-    - zram
-
-- name: set dirty_ratio value for zram
-  ansible.posix.sysctl:
-    name: vm.dirty_ratio
-    value: '20'
-    state: present
-    reload: true
-  become: true
-  tags:
-    - ostune
-    - zram
-
-- name: prevent sending IP spoofed packets
-  # Spoofed packets are commonly used by trojans that make use of
-  # compromised hosts to deliver denial of service, man in the middle
-  # or connection hijacking.
-  ansible.posix.sysctl:
-    name: "{{ item }}"
-    value: '2'
-    state: present
-    reload: true
-  with_items:
-    - net.ipv4.conf.all.rp_filter
-    - net.ipv4.conf.default.rp_filter
-  become: true
-  tags:
-    - ostune
-    - hardening
-
-- name: deny source routing
-  # Source routing might permit an attacker to send packets through a
-  # host (if routing is enabled) to other hosts without following network
-  # topology setup. It should be enabled only under very special
-  # circumstances or otherwise an attacker could try to bypass the traffic
-  # filtering that is done on the network.
-  ansible.posix.sysctl:
-    name: "{{ item }}"
-    value: '0'
-    state: present
-    reload: true
-  with_items:
-    - net.ipv4.conf.all.accept_source_route
-    - net.ipv4.conf.default.accept_source_route
-  become: true
-  tags:
-    - ostune
-    - hardening
-
-- name: log suspicious packets
-  # Log suspicious packets received by the kernel to detect icoming attacks.
-  ansible.posix.sysctl:
-    name: "{{ item }}"
-    value: '1'
-    state: present
-    reload: true
-  with_items:
-    - net.ipv4.conf.all.log_martians
-    - net.ipv4.conf.default.log_martians
-  become: true
-  tags:
-    - ostune
-    - hardening
-
-- name: deny icmp redirect
-  # an attacker could send bogus ICMP redirection messages to try to route the
-  # outgoing network packets to other systems (including his own) and thus
-  # allowing for man in the middle or denial of service attacks.
-  ansible.posix.sysctl:
-    name: "{{ item }}"
-    value: '0'
-    state: present
-    reload: true
-  with_items:
-    - net.ipv4.conf.all.accept_redirects
-    - net.ipv4.conf.default.accept_redirects
-  become: true
-  tags:
-    - ostune
-    - hardening
-
 - name: restrict crontab usage
   ansible.builtin.lineinfile:
     path: /etc/cron.allow
@@ -492,3 +380,22 @@
   tags:
     - ostune
     - hardening
+
+- name : install tuned base profile
+  ansible.builtin.copy:
+    src: tuned-base.conf
+    dest: /usr/lib/tuned/base/tuned.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  tags:
+    - ostune
+    - tuned
+
+- name: activate base tuned profile
+  ansible.builtin.shell: sudo tuned-adm profile base
+  become: true
+  tags:
+    - ostune
+    - tuned

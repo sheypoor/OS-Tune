@@ -1,24 +1,18 @@
----
-# Set disk read-ahead to 128kb
-- name: copy timer unit
+- name : install tuned elastic profile
   ansible.builtin.copy:
-    src: readahead.service
-    dest: /lib/systemd/system/readahead.service
+    src: tuned-elastic.conf
+    dest: /usr/lib/tuned/elastic/tuned.conf
     owner: root
     group: root
     mode: '0644'
   become: true
   tags:
-    - ostune
+    - tuned
     - elastic
 
-- name: enable and run timer unit
-  ansible.builtin.systemd:
-    name: readahead.service
-    daemon_relaod: true
-    state: started
-    enabled: true
+- name: activate elastic tuned profile
+  ansible.builtin.shell: sudo tuned-adm profile elastic
   become: true
   tags:
-    - ostune
+    - tuned
     - elastic

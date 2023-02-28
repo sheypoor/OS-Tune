@@ -1,9 +1,0 @@
-[Unit]
-Description=Set readahead to 128kb
-
-[Service]
-Type=simple
-ExecStart=blockdev --setra 128 /dev/mapper/debian--vg-root
-
-[Install]
-WantedBy=multi-user.target
