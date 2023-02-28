@@ -1,0 +1,18 @@
+- name : install tuned redis profile
+  ansible.builtin.copy:
+    src: tuned-redis.conf
+    dest: /usr/lib/tuned/redis/tuned.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  tags:
+    - tuned
+    - redis
+
+- name: activate redis tuned profile
+  ansible.builtin.shell: sudo tuned-adm profile redis
+  become: true
+  tags:
+    - tuned
+    - redis
