@@ -1,0 +1,18 @@
+- name : install tuned minio profile
+  ansible.builtin.copy:
+    src: tuned-minio.conf
+    dest: /usr/lib/tuned/minio/tuned.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  tags:
+    - tuned
+    - minio
+
+- name: activate minio tuned profile
+  ansible.builtin.shell: sudo tuned-adm profile minio
+  become: true
+  tags:
+    - tuned
+    - minio
