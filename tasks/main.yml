@@ -381,6 +381,12 @@
     - ostune
     - hardening
 
+- name: create base directory
+  ansible.builtin.file:
+    path: /usr/lib/tuned/base
+    state: directory
+    mode: '0755'
+
 - name : install tuned base profile
   ansible.builtin.copy:
     src: tuned-base.conf
