@@ -1,7 +1,0 @@
----
-- hosts: all
-  remote_user: "{{ user }}"
-  become: true
-  roles:
-    - ostune
-    - tuned
