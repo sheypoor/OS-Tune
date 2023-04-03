@@ -1,0 +1,11 @@
+---
+- hosts: all
+  remote_user: "{{ user }}"
+  become: true
+  tasks:
+    - ansible.builtin.include_role:
+        name: '{{ item }}'
+      loop: '{{ role }}'
+      tags: 
+        - '{{ tag }}'
+
