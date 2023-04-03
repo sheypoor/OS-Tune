@@ -6,8 +6,5 @@
     - ansible.builtin.include_role:
         name: '{{ item }}'
         tasks_from: '{{ task }}'
-        apply:
-          tags:
-            - '{{ atag }}'
       loop: '{{ role }}'
       tags: '{{ tag }}'
