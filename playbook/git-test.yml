@@ -10,5 +10,4 @@
           tags:
             - '{{ atag }}'
       loop: '{{ role }}'
-      tags:
-        - '{{ tag }}'
+      tags: '{{ tag }}'
