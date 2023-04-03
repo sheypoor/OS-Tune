@@ -4,11 +4,8 @@
   become: true
   tasks:
     - ansible.builtin.include_role:
-        name: '{{ role }}'
+        name: '{{ item }}'
         tasks_from: '{{ task }}'
-        apply:
-          tags:
-            - '{{ atag }}'
-      tags: 
-        - '{{ tag }}'
-
+        tags: 
+          - '{{ tag }}'
+      loop: '{{ role }}'
