@@ -1,3 +1,9 @@
+- name: create redis directory
+  ansible.builtin.file:
+    path: /usr/lib/tuned/redis
+    state: directory
+    mode: '0755'
+
 - name : install tuned redis profile
   ansible.builtin.copy:
     src: tuned-redis.conf

@@ -1,3 +1,9 @@
+- name: create minio directory
+  ansible.builtin.file:
+    path: /usr/lib/tuned/minio
+    state: directory
+    mode: '0755'
+
 - name : install tuned minio profile
   ansible.builtin.copy:
     src: tuned-minio.conf

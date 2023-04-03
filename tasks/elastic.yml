@@ -1,3 +1,9 @@
+- name: create elsatic directory
+  ansible.builtin.file:
+    path: /usr/lib/tuned/elastic
+    state: directory
+    mode: '0755'
+
 - name : install tuned elastic profile
   ansible.builtin.copy:
     src: tuned-elastic.conf
